@@ -1,6 +1,10 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
+const privateKey =
+  process.env.MST_PRIVATE_KEY || process.env.DEPLOYER_PRIVATE_KEY || "";
+const accounts = privateKey ? [privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`] : [];
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
@@ -19,7 +23,12 @@ module.exports = {
     testnet: {
       url: process.env.MST_RPC_URL || "https://testnetrpc.mstblockchain.com",
       chainId: parseInt(process.env.MST_CHAIN_ID || "91562037", 10),
-      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+      accounts: accounts,
+    },
+    mstTestnet: {
+      url: process.env.MST_RPC_URL || "https://testnetrpc.mstblockchain.com",
+      chainId: parseInt(process.env.MST_CHAIN_ID || "91562037", 10),
+      accounts: accounts,
     },
   },
   paths: {

@@ -25,6 +25,16 @@ Create Task
 `ProofToPay.sol` manages task lifecycle, escrow, proof hashes, verification and payment release.
 It guarantees that rewards locked in escrow cannot be released unless the independent verifier confirms the physical sensor proof hash.
 
+## MST Testnet Deployment
+- **Network**: MST Testnet
+- **Chain ID**: `91562037`
+- **RPC URL**: `https://testnetrpc.mstblockchain.com`
+- **Deployer / Creator**: `0xBFe57C1C2B2eCeBF1f543A293b48221469EF4302`
+- **Contract Address**: [`0x09b9e52dE1B7fd4cD1eC7139275131557dbF5347`](https://testnet.mstscan.com/address/0x09b9e52dE1B7fd4cD1eC7139275131557dbF5347)
+- **Deployment Transaction**: [`0x1dbc5be4c55ab28e725f811020d5f949a0e5d1f512fea7f37d874310ba8b7f8c`](https://testnet.mstscan.com/tx/0x1dbc5be4c55ab28e725f811020d5f949a0e5d1f512fea7f37d874310ba8b7f8c)
+- **First Interaction (`createTask T001`)**: [`0xbd615dc8556a8749a8e032c827e111ce1fc382bf171f13d3535ed7a520dd758f`](https://testnet.mstscan.com/tx/0xbd615dc8556a8749a8e032c827e111ce1fc382bf171f13d3535ed7a520dd758f)
+- **Deployment Status**: **VERIFIED**
+
 ## Technology
 - MST Blockchain
 - MST Testnet
@@ -41,15 +51,21 @@ It guarantees that rewards locked in escrow cannot be released unless the indepe
 - Sensors
 
 ## Current Status
-Phase 2 — Smart Contract Development
+Phase 3 — MST Testnet Deployment (Verified)
 
-## Local Testing
+## Local Testing & Scripts
 To compile contracts and run the full Hardhat test suite:
 
 ```bash
 # Compile smart contracts
 npx hardhat compile
 
-# Run the automated test suite
+# Run the automated unit tests (17 passing)
 npx hardhat test
+
+# Deploy to MST Testnet
+npx hardhat run scripts/deploy.js --network mstTestnet
+
+# Run task creation interaction on MST Testnet
+npx hardhat run scripts/createTask.js --network mstTestnet
 ```
