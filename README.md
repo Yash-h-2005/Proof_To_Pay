@@ -21,10 +21,16 @@ Create Task
 → Smart Contract Verification
 → Payment Release
 
+## Smart Contract
+`ProofToPay.sol` manages task lifecycle, escrow, proof hashes, verification and payment release.
+It guarantees that rewards locked in escrow cannot be released unless the independent verifier confirms the physical sensor proof hash.
+
 ## Technology
 - MST Blockchain
 - MST Testnet
 - Solidity
+- Hardhat
+- OpenZeppelin Contracts
 - BridgeKey
 - React
 - TypeScript
@@ -34,5 +40,16 @@ Create Task
 - RFID
 - Sensors
 
-## Project Status
-Phase 0 — Project Setup
+## Current Status
+Phase 2 — Smart Contract Development
+
+## Local Testing
+To compile contracts and run the full Hardhat test suite:
+
+```bash
+# Compile smart contracts
+npx hardhat compile
+
+# Run the automated test suite
+npx hardhat test
+```
