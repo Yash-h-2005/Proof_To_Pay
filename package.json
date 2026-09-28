@@ -1,0 +1,19 @@
+{
+  "name": "proof-to-pay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Blockchain-powered robot marketplace where NEURICK robots perform physical tasks and receive MST Blockchain smart-contract escrow payments upon verified proof.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mst-blockchain",
+    "robotics",
+    "smart-contracts",
+    "proof-to-pay",
+    "iot",
+    "escrow"
+  ],
+  "author": "",
+  "license": "MIT"
+}
