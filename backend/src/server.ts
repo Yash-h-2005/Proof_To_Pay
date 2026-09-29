@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import { env } from "./config/env";
 import healthRoutes from "./routes/healthRoutes";
@@ -13,7 +13,10 @@ const configuredOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim().replace
 
 app.use(
   cors({
-    origin: (requestOrigin, callback) => {
+    origin: (
+      requestOrigin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void
+    ) => {
       // Allow requests with no origin (e.g. mobile apps, curl, hardware bridge, server-to-server)
       if (!requestOrigin) {
         return callback(null, true);
@@ -45,7 +48,7 @@ app.use("/api", taskRoutes);
 
 // ─── 404 fallback ─────────────────────────────────────────────────────────────
 
-app.use((_req, res) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Route not found" });
 });
 

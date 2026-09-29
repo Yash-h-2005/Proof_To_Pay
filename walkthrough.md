@@ -216,3 +216,24 @@ The project has been prepared and locally validated for public deployment:
   - `PROOF_TO_PAY_CONTRACT`: `0x09b9e52dE1B7fd4cD1eC7139275131557dbF5347`
   - `CORS_ORIGIN`: `*` (or your specific Vercel URL)
 
+---
+
+## 8. Render TypeScript Build Fix
+
+### Problem
+On Render cloud deployment, when `NODE_ENV=production` is set or default production install behavior runs:
+1. `npm install` skips installing packages located in `devDependencies`.
+2. `@types/express`, `@types/cors`, `@types/node`, and `typescript` were previously in `devDependencies`.
+3. Consequently, `tsc` failed during Render build with:
+   - `Could not find a declaration file for module 'express'`
+   - `Could not find a declaration file for module 'cors'`
+   - `TS7006: Parameter implicitly has an 'any' type`
+
+### Solution Applied
+1. Moved `@types/express`, `@types/cors`, `@types/node`, and `typescript` directly into `dependencies` in `backend/package.json`.
+2. Synchronized `backend/package-lock.json` via `npm install`.
+3. Added explicit type annotations (`Request, Response`, `requestOrigin: string | undefined`, `callback`) in `backend/src/server.ts`.
+4. Verified local TypeScript compilation: `npm run build` completed with 0 errors.
+5. Ran backend test suite: 10 / 10 tests passed.
+
+
