@@ -1,0 +1,42 @@
+{
+  "name": "proof-to-pay-robot-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NEURICK Robot Simulator for Proof-to-Pay. Simulates physical task execution and generates sensor proof for the backend API.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "simulate": "ts-node src/index.ts",
+    "test": "jest --forceExit",
+    "test:verbose": "jest --verbose --forceExit"
+  },
+  "keywords": ["neurick", "robot", "simulator", "proof-to-pay", "mst-blockchain"],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.10",
+    "jest": "^29.7.0",
+    "nock": "^13.5.4",
+    "ts-jest": "^29.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": ["**/src/**/*.test.ts"],
+    "roots": ["<rootDir>/src"],
+    "transform": {
+      "^.+\\.ts$": ["ts-jest", {
+        "tsconfig": "<rootDir>/tsconfig.json"
+      }]
+    },
+    "moduleFileExtensions": ["ts", "js", "json"]
+  }
+}

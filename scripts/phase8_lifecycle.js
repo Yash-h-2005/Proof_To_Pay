@@ -1,0 +1,166 @@
+const dotenv = require('dotenv');
+const { ethers } = require('ethers');
+const path = require('path');
+
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const MST_RPC_URL = process.env.MST_RPC_URL;
+const MST_PRIVATE_KEY = process.env.MST_PRIVATE_KEY;
+const CONTRACT_ADDRESS = process.env.PROOF_TO_PAY_CONTRACT_ADDRESS;
+
+const PROOF_TO_PAY_ABI = [
+  "function createTask(string calldata taskId, uint256 reward, string calldata packageId, string calldata source, string calldata destination) external",
+  "function fundTask(string calldata taskId) external payable",
+  "function assignRobot(string calldata taskId, address robot) external",
+  "function startTask(string calldata taskId) external",
+  "function submitProof(string calldata taskId, bytes32 proofHash) external",
+  "function verifyTask(string calldata taskId, bool success) external",
+  "function releasePayment(string calldata taskId) external",
+  "function getTask(string calldata taskId) external view returns (tuple(string taskId, address creator, address robot, uint256 reward, string packageId, string source, string destination, bytes32 proofHash, uint8 state, uint256 createdAt, uint256 proofSubmittedAt, uint256 verifiedAt))"
+];
+
+async function main() {
+  const provider = new ethers.JsonRpcProvider(MST_RPC_URL);
+  const wallet = new ethers.Wallet(MST_PRIVATE_KEY, provider);
+  const contract = new ethers.Contract(CONTRACT_ADDRESS, PROOF_TO_PAY_ABI, wallet);
+
+  const TASK_ID = "T002";
+  const REWARD_MSTC = "1";
+  const REWARD_WEI = ethers.parseEther(REWARD_MSTC);
+  const PACKAGE_ID = "P02";
+  const SOURCE = "Zone A";
+  const DESTINATION = "Zone B";
+  
+  const evidence = {
+    taskId: TASK_ID,
+    robotId: "NR-001",
+    packageId: PACKAGE_ID,
+    source: SOURCE,
+    destination: DESTINATION,
+    timestamp: Math.floor(Date.now() / 1000),
+    rfidUid: "A1:B2:C3:D4", 
+    distance: 12.4
+  };
+  
+  const canonical = {
+    taskId: evidence.taskId,
+    robotId: evidence.robotId,
+    packageId: evidence.packageId,
+    source: evidence.source,
+    destination: evidence.destination,
+    timestamp: evidence.timestamp,
+    rfidUid: evidence.rfidUid,
+    distance: evidence.distance
+  };
+  const canonicalData = JSON.stringify(canonical, Object.keys(canonical).sort());
+  const proofHash = ethers.keccak256(ethers.toUtf8Bytes(canonicalData));
+
+  console.log("==================================================");
+  console.log("PHASE 8 ON-CHAIN LIFECYCLE FOR T002");
+  console.log("==================================================");
+
+  const stateLabels = ["CREATED", "FUNDED", "ASSIGNED", "WORKING", "PROOF_SUBMITTED", "VERIFIED", "PAID", "REFUNDED"];
+
+  async function checkState(step, expectedState) {
+    const task = await contract.getTask(TASK_ID);
+    const stateStr = stateLabels[task.state];
+    console.log(`[${step}] Task State: ${stateStr}`);
+    if (stateStr !== expectedState) {
+      throw new Error(`Expected state ${expectedState}, got ${stateStr}`);
+    }
+  }
+
+  try {
+    await contract.getTask(TASK_ID);
+    console.log("T002 already exists. We will proceed depending on its state.");
+  } catch (err) {
+    if (err.message.includes("Task does not exist") || err.message.includes("revert")) {
+      console.log("STEP 1: Create Task T002");
+      const txCreate = await contract.createTask(TASK_ID, REWARD_WEI, PACKAGE_ID, SOURCE, DESTINATION);
+      console.log(`CREATE TX HASH: ${txCreate.hash}`);
+      await txCreate.wait();
+      await checkState("Create", "CREATED");
+    } else {
+      throw err;
+    }
+  }
+
+  const taskCurrent = await contract.getTask(TASK_ID);
+  let currentState = Number(taskCurrent.state);
+
+  if (currentState === 0) { 
+    console.log("\nSTEP 2: Fund Task T002");
+    const txFund = await contract.fundTask(TASK_ID, { value: REWARD_WEI });
+    console.log(`FUND TX HASH: ${txFund.hash}`);
+    await txFund.wait();
+    await checkState("Fund", "FUNDED");
+    currentState = 1;
+  }
+
+  if (currentState === 1) { 
+    console.log("\nSTEP 3: Assign Robot");
+    const txAssign = await contract.assignRobot(TASK_ID, wallet.address);
+    console.log(`ASSIGN TX HASH: ${txAssign.hash}`);
+    await txAssign.wait();
+    await checkState("Assign", "ASSIGNED");
+    currentState = 2;
+  }
+
+  if (currentState === 2) { 
+    console.log("\nSTEP 4: Start Task");
+    const txStart = await contract.startTask(TASK_ID);
+    console.log(`START TX HASH: ${txStart.hash}`);
+    await txStart.wait();
+    await checkState("Start", "WORKING");
+    currentState = 3;
+  }
+
+  console.log("\nSTEP 5: Robot Execution (simulated in this script)");
+  console.log("STEP 6: Generate Proof (simulated in this script)");
+  console.log(`Proof Hash: ${proofHash}`);
+  console.log("STEP 7: Independent Verifier checks (simulated offline passing)");
+
+  if (currentState === 3) { 
+    console.log("\nSTEP 8: Submit Proof on-chain");
+    const txProof = await contract.submitProof(TASK_ID, proofHash);
+    console.log(`PROOF TX HASH: ${txProof.hash}`);
+    await txProof.wait();
+    await checkState("SubmitProof", "PROOF_SUBMITTED");
+    currentState = 4;
+  }
+
+  if (currentState === 4) { 
+    console.log("\nSTEP 9: On-Chain Verification");
+    const txVerify = await contract.verifyTask(TASK_ID, true);
+    console.log(`VERIFY TX HASH: ${txVerify.hash}`);
+    await txVerify.wait();
+    await checkState("Verify", "VERIFIED");
+    currentState = 5;
+  }
+
+  if (currentState === 5) { 
+    const balanceBefore = await provider.getBalance(wallet.address);
+    console.log(`\nBalance before release: ${ethers.formatEther(balanceBefore)} MSTC`);
+
+    console.log("STEP 10: Release Payment");
+    const txRelease = await contract.releasePayment(TASK_ID);
+    console.log(`PAYMENT TX HASH: ${txRelease.hash}`);
+    const receipt = await txRelease.wait();
+    await checkState("Release", "PAID");
+
+    const balanceAfter = await provider.getBalance(wallet.address);
+    console.log(`Balance after release: ${ethers.formatEther(balanceAfter)} MSTC`);
+    
+    const gasUsed = BigInt(receipt.gasUsed) * BigInt(receipt.gasPrice);
+    const diff = balanceAfter - balanceBefore;
+    console.log(`Difference (incl gas): ${ethers.formatEther(diff)} MSTC`);
+    console.log(`Expected (1 MSTC - gas): ${ethers.formatEther(REWARD_WEI - gasUsed)} MSTC`);
+  }
+
+  console.log("\nLIFECYCLE COMPLETE");
+}
+
+main().catch(err => {
+  console.error("Error:", err);
+  process.exit(1);
+});
