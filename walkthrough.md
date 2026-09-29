@@ -160,10 +160,24 @@ Running `python -u hardware/bridge/serial_bridge.py --task T008` against the rea
 
 ---
 
-## 5. Constraints Adherence
-
 - **Smart Contract Unchanged**: No modifications made to any contract.
 - **On-chain State Unchanged**: Task `T008` remains untouched in `WORKING` state.
 - **No Hard-coded Task IDs**: Firmware and bridge support arbitrary task assignments (`T008` -> `T009` -> `T010`).
 - **Real Hardware Functions Intact**: Real RC522 RFID reader (pins 3, 15, 18, 17, 16) and battery telemetry fully functional.
-- **Git State**: No commits or pushes created.
+
+---
+
+## 6. GitHub Repository Deployment
+
+The entire project has been successfully committed and pushed to GitHub:
+- **Repository URL**: `https://github.com/Yash-h-2005/Proof_To_Pay.git`
+- **Branches Synchronized**: `master`, `main`
+- **Included Components**:
+  - `contracts/`: Solidity escrow contracts and deployment scripts
+  - `backend/`: Express + TypeScript API, blockchain events, and evidence store
+  - `frontend/`: React + Vite + Tailwind CSS / Vanilla CSS dashboard & task manager
+  - `hardware/`: Task-dynamic NEURICK firmware (ESP32-S3), RC522 RFID reader, USB serial bridge, and protocol tests
+  - `verifier/`: Independent off-chain verification engine & CLI
+  - `robot/simulator/`: Autonomous robot simulator
+  - `docs/`: Complete architecture and verification documentation
+- **Security Check**: `.env` and `frontend/.env` (containing private keys) remain protected and ignored via `.gitignore`.
