@@ -44,6 +44,7 @@ Usage:
     python hardware/bridge/serial_bridge.py --test --task T008
 """
 
+import os
 import sys
 import json
 import time
@@ -59,7 +60,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 DEFAULT_COM_PORT    = "COM9"
 DEFAULT_BAUD_RATE   = 115200
-DEFAULT_BACKEND_URL = "http://localhost:3001"
+DEFAULT_BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:3001")
 DEFAULT_TIMEOUT     = 120
 
 REQUIRED_FIELDS = [

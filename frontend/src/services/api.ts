@@ -19,7 +19,9 @@ interface ApiError {
 }
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
-  const primaryUrl = `${BACKEND_URL}${path}`;
+  const baseUrl = BACKEND_URL.replace(/\/+$/, '');
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const primaryUrl = `${baseUrl}${cleanPath}`;
   try {
     const res = await fetch(primaryUrl, {
       ...options,

@@ -181,3 +181,38 @@ The entire project has been successfully committed and pushed to GitHub:
   - `robot/simulator/`: Autonomous robot simulator
   - `docs/`: Complete architecture and verification documentation
 - **Security Check**: `.env` and `frontend/.env` (containing private keys) remain protected and ignored via `.gitignore`.
+
+---
+
+## 7. Public Deployment Readiness (Vercel & Render)
+
+The project has been prepared and locally validated for public deployment:
+
+### Frontend (Vercel)
+- **Root Directory**: `frontend`
+- **Framework Preset**: `Vite`
+- **Build Command**: `npm run build` (`tsc && vite build`)
+- **Output Directory**: `dist`
+- **SPA Routing**: Configured via `frontend/vercel.json` rewrites.
+- **Environment Variables**:
+  - `VITE_BACKEND_URL`: `https://<your-render-service>.onrender.com`
+  - `VITE_MST_RPC_URL`: `https://testnetrpc.mstblockchain.com`
+  - `VITE_MST_CHAIN_ID`: `91562037`
+  - `VITE_MST_EXPLORER_URL`: `https://testnet.mstscan.com`
+  - `VITE_PROOF_TO_PAY_CONTRACT`: `0x09b9e52dE1B7fd4cD1eC7139275131557dbF5347`
+
+### Backend (Render Web Service)
+- **Root Directory**: `backend`
+- **Environment**: `Node`
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `npm start` (`node dist/server.js`)
+- **Network Binding**: Explicitly configured for `0.0.0.0` with dynamic `$PORT`.
+- **CORS Support**: Auto-configured for any `*.vercel.app` frontend domain, custom origins, and localhost.
+- **Environment Variables**:
+  - `NODE_ENV`: `production`
+  - `MST_RPC_URL`: `https://testnetrpc.mstblockchain.com`
+  - `MST_CHAIN_ID`: `91562037`
+  - `MST_EXPLORER_URL`: `https://testnet.mstscan.com`
+  - `PROOF_TO_PAY_CONTRACT`: `0x09b9e52dE1B7fd4cD1eC7139275131557dbF5347`
+  - `CORS_ORIGIN`: `*` (or your specific Vercel URL)
+

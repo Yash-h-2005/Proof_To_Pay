@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 import * as path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config(); // fallback to process.cwd() .env if running from subfolder
 
 function requireEnv(key: string, fallback?: string): string {
   const value = process.env[key] ?? fallback;

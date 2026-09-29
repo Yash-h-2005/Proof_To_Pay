@@ -9,7 +9,33 @@ const app = express();
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
-app.use(cors({ origin: env.CORS_ORIGIN }));
+const configuredOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim().replace(/\/+$/, ""));
+
+app.use(
+  cors({
+    origin: (requestOrigin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, hardware bridge, server-to-server)
+      if (!requestOrigin) {
+        return callback(null, true);
+      }
+      const cleanOrigin = requestOrigin.replace(/\/+$/, "");
+      // Allow if wildcard configured or in explicit origins list
+      if (env.CORS_ORIGIN === "*" || configuredOrigins.includes("*") || configuredOrigins.includes(cleanOrigin)) {
+        return callback(null, true);
+      }
+      // Allow Vercel preview and production domains (*.vercel.app)
+      if (/^https:\/\/[a-zA-Z0-9_.-]+\.vercel\.app$/.test(cleanOrigin)) {
+        return callback(null, true);
+      }
+      // Allow localhost dev origins
+      if (/^http:\/\/localhost(:\d+)?$/.test(cleanOrigin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS blocked for origin: ${requestOrigin}`));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
@@ -44,11 +70,12 @@ async function start(): Promise<void> {
     console.error("  The server will still start — blockchain endpoints will return errors until RPC is reachable.");
   }
 
-  app.listen(env.PORT, () => {
-    console.log(`\n✓ Server running on http://localhost:${env.PORT}`);
-    console.log(`  Health:     GET http://localhost:${env.PORT}/api/health`);
-    console.log(`  Blockchain: GET http://localhost:${env.PORT}/api/blockchain`);
-    console.log(`  Task T001:  GET http://localhost:${env.PORT}/api/tasks/T001`);
+  const HOST = process.env.HOST ?? "0.0.0.0";
+  app.listen(env.PORT, HOST, () => {
+    console.log(`\n✓ Server running on http://${HOST}:${env.PORT}`);
+    console.log(`  Health:     GET http://${HOST}:${env.PORT}/api/health`);
+    console.log(`  Blockchain: GET http://${HOST}:${env.PORT}/api/blockchain`);
+    console.log(`  Task T001:  GET http://${HOST}:${env.PORT}/api/tasks/T001`);
   });
 }
 

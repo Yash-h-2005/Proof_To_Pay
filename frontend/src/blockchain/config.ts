@@ -18,7 +18,9 @@ export const PROOF_TO_PAY_CONTRACT =
   '0x09b9e52dE1B7fd4cD1eC7139275131557dbF5347';
 
 export const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3001';
+  import.meta.env.VITE_BACKEND_URL ??
+  import.meta.env.VITE_API_BASE_URL ??
+  'http://localhost:3001';
 
 /** MST Testnet chain params — used when requesting wallet to add/switch network */
 export const MST_TESTNET_CHAIN_PARAMS = {
